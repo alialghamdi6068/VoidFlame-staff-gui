@@ -1,0 +1,24 @@
+gui:
+  title: "&8VoidFlame &5Staff Control"
+  rows: 6
+  filler: "BLACK_STAINED_GLASS_PANE"
+  confirm-title: "&8Confirm Action"
+settings:
+  heal-food-level: 20
+  default-walk-speed: 0.2
+  default-fly-speed: 0.1
+  max-speed: 1.0
+  clear-chat-lines: 100
+  kick-all-except-staff: true
+  protect-staff-actions: true
+  log-actions: true
+messages:
+  no-permission: "&cYou do not have permission."
+  player-not-found: "&cPlayer not found."
+  reloaded: "&aVoidFlame Staff GUI reloaded."
+  action: "&aAction completed: &f%action%"
+  target-required: "&cThis action requires a target player."
+flags:
+  pvp: true
+  block-place: true
+  mob-spawning: true
