@@ -1,0 +1,34 @@
+name: VoidFlame-staff-gui
+version: 1.0.0
+main: net.voidflame.staffgui.VoidFlameStaffGui
+description: VoidFlame professional staff management GUI.
+author: VoidFlame
+api-version: '26.2'
+softdepend: [VoidFlame-Core, VoidFlame-Logs]
+
+commands:
+  staff:
+    description: Open the VoidFlame staff control panel.
+    usage: /staff
+    permission: voidflame.staff
+  staffgui:
+    description: Open the VoidFlame staff control panel.
+    usage: /staffgui
+    permission: voidflame.staff
+
+permissions:
+  voidflame.staff:
+    description: Access the staff GUI.
+    default: op
+  voidflame.staff.admin:
+    description: Access destructive server and player management actions.
+    default: op
+  voidflame.staff.world:
+    description: Manage worlds from the staff GUI.
+    default: op
+  voidflame.staff.server:
+    description: Manage server state from the staff GUI.
+    default: op
+  voidflame.staff.players:
+    description: Manage players from the staff GUI.
+    default: op
