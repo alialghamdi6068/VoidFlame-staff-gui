@@ -226,7 +226,7 @@ public final class VoidFlameStaffGui extends JavaPlugin implements Listener, Com
     private void worlds(Player p,int s,boolean rightClick){if(s==50){openMain(p);return;}if(s==49){if(!p.hasPermission("voidflame.staff.world"))return;String n="StaffWorld_"+System.currentTimeMillis()%10000;World w=Bukkit.createWorld(new WorldCreator(n));if(w!=null)p.teleport(w.getSpawnLocation());done(p,"World Created");return;}ItemStack x=p.getOpenInventory().getTopInventory().getItem(s);if(x==null||x.getItemMeta()==null)return;String n=ChatColor.stripColor(x.getItemMeta().getDisplayName());World w=Bukkit.getWorld(n);if(w==null)return;
         if(rightClick){
             if(!p.hasPermission("voidflame.staff.world")){msg(p,"no-permission");return;}
-            if(w.getPlayers().stream().anyMatch(x->!x.equals(p))){msg(p,"world-has-players");return;}
+            if(w.getPlayers().stream().anyMatch(player->!player.equals(p))){msg(p,"world-has-players");return;}
             if(w.equals(p.getWorld())){msg(p,"cannot-remove-current-world");return;}
             Bukkit.unloadWorld(w,false);
             java.io.File folder=w.getWorldFolder();
@@ -242,7 +242,7 @@ public final class VoidFlameStaffGui extends JavaPlugin implements Listener, Com
         f.delete();
     }
 
-    private void openTime(Player p){Inventory i=gui("time",3,"&8Time / Weather");put(i,10,Material.SUNFLOWER,"&eDay");put(i,11,Material.CLOCK,"&6Noon");put(i,12,Material.CLOCK,"&9Night");put(i,13,Material.WATER_BUCKET,"&bClear Weather");put(i,14,Material.LIGHTNING_ROD,"&cStorm");put(i,15,Material.LODESTONE,"&5Lock/Unlock Time");put(i,16,Material.CHAIN,"&5Lock/Unlock Weather");put(i,17,Material.ARROW,"&7Back");p.openInventory(i);}
+    private void openTime(Player p){Inventory i=gui("time",3,"&8Time / Weather");put(i,10,Material.SUNFLOWER,"&eDay");put(i,11,Material.CLOCK,"&6Noon");put(i,12,Material.CLOCK,"&9Night");put(i,13,Material.WATER_BUCKET,"&bClear Weather");put(i,14,Material.LIGHTNING_ROD,"&cStorm");put(i,15,Material.LODESTONE,"&5Lock/Unlock Time");put(i,16,Material.IRON_BARS,"&5Lock/Unlock Weather");put(i,17,Material.ARROW,"&7Back");p.openInventory(i);}
     private void time(Player p,int s){if(s==17){openMain(p);return;}if(s==10){lockedTime=1000;}else if(s==11){lockedTime=6000;}else if(s==12){lockedTime=13000;}else if(s==13){storm=false;}else if(s==14){storm=true;}else if(s==15){lockTime=!lockTime;}else if(s==16){lockWeather=!lockWeather;}applyTimeWeather();saveState();done(p,"Time / Weather");openTime(p);}
     private void applyTimeWeather(){for(World w:Bukkit.getWorlds()){if(lockTime)w.setTime(lockedTime);if(lockWeather){w.setStorm(storm);w.setThundering(false);}}}
     private void enforceLocks(){if(lockTime||lockWeather)applyTimeWeather();}
