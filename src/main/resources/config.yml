@@ -23,5 +23,5 @@ flags:
 
 messages:
   no-permission: "&cYou do not have permission."
-  target-required: "&cSelect a target player first."
+  target-required: "&cSelect a target player first."\n  world-has-players: "&cMove players out of this world first."\n  cannot-remove-current-world: "&cYou cannot remove the world you are currently in."
   action: "&aAction completed: &f%action%"
