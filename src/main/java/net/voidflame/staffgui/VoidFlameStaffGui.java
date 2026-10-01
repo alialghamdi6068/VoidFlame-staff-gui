@@ -132,10 +132,10 @@ public final class VoidFlameStaffGui extends JavaPlugin implements Listener, Com
             case 14 -> { t.setWalkSpeed(nextSpeed(t.getWalkSpeed())); done(p, "Walk Speed"); }
             case 15 -> { t.setFlySpeed(nextSpeed(t.getFlySpeed())); done(p, "Fly Speed"); }
             case 16 -> openPotions(p);
-            case 19 -> { for (ItemStack i:t.getInventory().getContents()) if(i!=null)i.setDurability((short)0); for(ItemStack i:t.getInventory().getArmorContents()) if(i!=null)i.setDurability((short)0); done(p,"Repair"); }
+            case 19 -> { for (ItemStack i : t.getInventory().getContents()) repair(i); for (ItemStack i : t.getInventory().getArmorContents()) repair(i); repair(t.getInventory().getItemInOffHand()); done(p,"Repair"); }
             case 20 -> armor(t);
             case 21 -> confirm(p, Action.CLEAR_INV);
-            case 22 -> { t.getInventory().setItemInOffHand(t.getInventory().getItemInOffHand()); done(p,"Clear Arrows"); }
+            case 22 -> { t.setArrowsInBody(0); done(p,"Clear Arrows"); }
             case 23 -> { t.giveExpLevels(5); done(p,"Experience"); }
             case 24 -> { p.openInventory(t.getInventory()); }
             case 25 -> p.openWorkbench(null, true);
@@ -176,7 +176,7 @@ public final class VoidFlameStaffGui extends JavaPlugin implements Listener, Com
 
     private void timeWeather(Player p){World w=p.getWorld();if(w.hasStorm()){w.setStorm(false);w.setTime(1000);}else{w.setStorm(true);w.setThundering(false);w.setTime(13000);}done(p,"Time & Weather");openMain(p);}
     private void clearChat(Player p){for(Player x:Bukkit.getOnlinePlayers())for(int i=0;i<getConfig().getInt("settings.clear-chat-lines",100);i++)x.sendMessage(" ");done(p,"Clear Chat");openMain(p);}
-    private void armor(Player t){ItemStack a=new ItemStack(Material.NETHERITE_HELMET),b=new ItemStack(Material.NETHERITE_CHESTPLATE),c=new ItemStack(Material.NETHERITE_LEGGINGS),d=new ItemStack(Material.NETHERITE_BOOTS);t.getInventory().setArmorContents(new ItemStack[]{d,c,b,a});done(t,"Armor Creator");}
+    private void repair(ItemStack item){ if(item==null || item.getType().isAir()) return; ItemMeta meta=item.getItemMeta(); if(meta instanceof org.bukkit.inventory.meta.Damageable damageable){ damageable.setDamage(0); item.setItemMeta(damageable); } }\n    private void armor(Player t){ItemStack a=new ItemStack(Material.NETHERITE_HELMET),b=new ItemStack(Material.NETHERITE_CHESTPLATE),c=new ItemStack(Material.NETHERITE_LEGGINGS),d=new ItemStack(Material.NETHERITE_BOOTS);t.getInventory().setArmorContents(new ItemStack[]{d,c,b,a});done(t,"Armor Creator");}
     private void confirm(Player p,Action action){confirmations.put(p.getUniqueId(),System.currentTimeMillis()+15000);Inventory i=Bukkit.createInventory(new Holder("confirm"),27,color(getConfig().getString("gui.confirm-title")));fill(i);item(i,11,Material.LIME_CONCRETE,"&aConfirm","Proceed.");item(i,15,Material.RED_CONCRETE,"&cCancel","Cancel.");p.openInventory(i);}
     private void handleConfirm(Player p,int s){Long until=confirmations.get(p.getUniqueId());if(until==null||until<System.currentTimeMillis()){p.closeInventory();return;}if(s==15){confirmations.remove(p.getUniqueId());openMain(p);return;}if(s==11){confirmations.remove(p.getUniqueId());Player t=target(p);if(t!=null){t.getInventory().clear();done(p,"Clear Inventory");}openMain(p);}}
     private Player target(Player p){return targets.get(p.getUniqueId());}
