@@ -130,7 +130,7 @@ public final class VoidFlameStaffGui extends JavaPlugin implements Listener, Com
             case "xp" -> xp(p,s);
             case "armor" -> armorMenu(p,s);
             case "server" -> server(p,s);
-            case "world" -> worlds(p,s);
+            case "world" -> worlds(p,s,e.isRightClick());
             case "time" -> time(p,s);
             case "flags" -> flagMenu(p,s);
             case "confirm" -> confirm(p,s);
@@ -219,11 +219,28 @@ public final class VoidFlameStaffGui extends JavaPlugin implements Listener, Com
     private void openArmor(Player p){Inventory i=gui("armor",3,"&8Armor Creator");put(i,10,Material.IRON_CHESTPLATE,"&7Iron Armor");put(i,11,Material.DIAMOND_CHESTPLATE,"&bDiamond Armor");put(i,12,Material.NETHERITE_CHESTPLATE,"&5Netherite Armor");put(i,13,Material.ENCHANTED_BOOK,"&dEnchanted Netherite","Protection IV + Unbreaking III");put(i,15,Material.ARROW,"&7Back");p.openInventory(i);}
     private void armorMenu(Player p,int s){Player t=target(p);if(s==15){openMain(p);return;}if(t==null)return;Material base=s==10?Material.IRON_CHESTPLATE:s==11?Material.DIAMOND_CHESTPLATE:Material.NETHERITE_CHESTPLATE;if(s==13)base=Material.NETHERITE_CHESTPLATE;Material h=base==Material.IRON_CHESTPLATE?Material.IRON_HELMET:base==Material.DIAMOND_CHESTPLATE?Material.DIAMOND_HELMET:Material.NETHERITE_HELMET;Material l=base==Material.IRON_CHESTPLATE?Material.IRON_LEGGINGS:base==Material.DIAMOND_CHESTPLATE?Material.DIAMOND_LEGGINGS:Material.NETHERITE_LEGGINGS;Material b=base==Material.IRON_CHESTPLATE?Material.IRON_BOOTS:base==Material.DIAMOND_CHESTPLATE?Material.DIAMOND_BOOTS:Material.NETHERITE_BOOTS;ItemStack[] set={new ItemStack(b),new ItemStack(l),new ItemStack(base),new ItemStack(h)};for(ItemStack x:set)if(s==13){x.addUnsafeEnchantment(Enchantment.PROTECTION,4);x.addUnsafeEnchantment(Enchantment.UNBREAKING,3);}t.getInventory().setArmorContents(set);done(p,"Armor Creator");openMain(p);}
 
-    private void openServer(Player p){Inventory i=gui("server",3,"&8Server Manager");put(i,10,Material.REDSTONE,"&cReload Config");put(i,11,Material.BARRIER,"&cStop Server");put(i,12,Material.WHITE_WOOL,"&fWhitelist: "+Bukkit.hasWhitelist());put(i,15,Material.ARROW,"&7Back");p.openInventory(i);}
-    private void server(Player p,int s){if(s==15){openMain(p);return;}if(!p.hasPermission("voidflame.staff.server")){msg(p,"no-permission");return;}if(s==10){reloadConfig();loadState();done(p,"Reload");openMain(p);}else if(s==11)confirm(p,Action.STOP);else if(s==12){Bukkit.setWhitelist(!Bukkit.hasWhitelist());done(p,"Whitelist");openServer(p);}}
+    private void openServer(Player p){Inventory i=gui("server",3,"&8Server Manager");put(i,10,Material.REDSTONE,"&cReload Server");put(i,11,Material.BARRIER,"&cStop Server");put(i,12,Material.WHITE_WOOL,"&fWhitelist: "+Bukkit.hasWhitelist());put(i,15,Material.ARROW,"&7Back");p.openInventory(i);}
+    private void server(Player p,int s){if(s==15){openMain(p);return;}if(!p.hasPermission("voidflame.staff.server")){msg(p,"no-permission");return;}if(s==10){Bukkit.reload();done(p,"Reload Server");openMain(p);}else if(s==11)confirm(p,Action.STOP);else if(s==12){Bukkit.setWhitelist(!Bukkit.hasWhitelist());done(p,"Whitelist");openServer(p);}}
 
     private void openWorlds(Player p){Inventory i=gui("world",6,"&8World Manager");int s=0;for(World w:Bukkit.getWorlds()){if(s>=45)break;put(i,s,Material.GRASS_BLOCK,"&a"+w.getName(),"Left: teleport | Right: remove");s++;}put(i,49,Material.ENDER_PEARL,"&bCreate World","Creates StaffWorld_N.");put(i,50,Material.ARROW,"&7Back");p.openInventory(i);}
-    private void worlds(Player p,int s){if(s==50){openMain(p);return;}if(s==49){if(!p.hasPermission("voidflame.staff.world"))return;String n="StaffWorld_"+System.currentTimeMillis()%10000;World w=Bukkit.createWorld(new WorldCreator(n));if(w!=null)p.teleport(w.getSpawnLocation());done(p,"World Created");return;}ItemStack x=p.getOpenInventory().getTopInventory().getItem(s);if(x==null||x.getItemMeta()==null)return;String n=ChatColor.stripColor(x.getItemMeta().getDisplayName());World w=Bukkit.getWorld(n);if(w==null)return;if(p.isSneaking()||p.getOpenInventory().getItem(s)!=null&&false){ }p.teleport(w.getSpawnLocation());}
+    private void worlds(Player p,int s,boolean rightClick){if(s==50){openMain(p);return;}if(s==49){if(!p.hasPermission("voidflame.staff.world"))return;String n="StaffWorld_"+System.currentTimeMillis()%10000;World w=Bukkit.createWorld(new WorldCreator(n));if(w!=null)p.teleport(w.getSpawnLocation());done(p,"World Created");return;}ItemStack x=p.getOpenInventory().getTopInventory().getItem(s);if(x==null||x.getItemMeta()==null)return;String n=ChatColor.stripColor(x.getItemMeta().getDisplayName());World w=Bukkit.getWorld(n);if(w==null)return;
+        if(rightClick){
+            if(!p.hasPermission("voidflame.staff.world")){msg(p,"no-permission");return;}
+            if(w.getPlayers().stream().anyMatch(x->!x.equals(p))){msg(p,"world-has-players");return;}
+            if(w.equals(p.getWorld())){msg(p,"cannot-remove-current-world");return;}
+            Bukkit.unloadWorld(w,false);
+            java.io.File folder=w.getWorldFolder();
+            deleteFolder(folder);
+            done(p,"World Removed");
+            openWorlds(p);
+        }else p.teleport(w.getSpawnLocation());
+    }
+    private void deleteFolder(java.io.File f){
+        if(!f.exists())return;
+        java.io.File[] children=f.listFiles();
+        if(children!=null)for(java.io.File child:children)deleteFolder(child);
+        f.delete();
+    }
 
     private void openTime(Player p){Inventory i=gui("time",3,"&8Time / Weather");put(i,10,Material.SUNFLOWER,"&eDay");put(i,11,Material.CLOCK,"&6Noon");put(i,12,Material.CLOCK,"&9Night");put(i,13,Material.WATER_BUCKET,"&bClear Weather");put(i,14,Material.LIGHTNING_ROD,"&cStorm");put(i,15,Material.LODESTONE,"&5Lock/Unlock Time");put(i,16,Material.CHAIN,"&5Lock/Unlock Weather");put(i,17,Material.ARROW,"&7Back");p.openInventory(i);}
     private void time(Player p,int s){if(s==17){openMain(p);return;}if(s==10){lockedTime=1000;}else if(s==11){lockedTime=6000;}else if(s==12){lockedTime=13000;}else if(s==13){storm=false;}else if(s==14){storm=true;}else if(s==15){lockTime=!lockTime;}else if(s==16){lockWeather=!lockWeather;}applyTimeWeather();saveState();done(p,"Time / Weather");openTime(p);}
